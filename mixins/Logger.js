@@ -6,45 +6,52 @@ module.exports = function(obj, setup) {
     setup = setup || {};
     var name = _.get(setup, 'name', 'Unnamed Logger');
     var level = _.get(setup, 'level', 'info');
+    var direct = _.get(setup, 'direct', false);
 
     var bunyanLogger = bunyan.createLogger({
         name: name,
         level: level
     });
 
-    var log = function(level, argsToLog) {
-        var toLog = Array.prototype.slice.call(argsToLog);
-        if(typeof toLog[0] === 'string') {
-            toLog.unshift(name);
-        } else {
-            toLog[0].loggerName = name;
+    var log = function(l, argsToLog) {
+        if(level === 'off') {
+            return false;
         }
-
-        bunyanLogger[level](toLog);
+        var toLog = Array.prototype.slice.call(argsToLog);
+        bunyanLogger[l](toLog);
+        return true;
     };
 
     var logger = {
         info: function() {
-            log('info', arguments);
+            return log('info', arguments);
         },
         warn: function() {
-            log('warn', arguments);
+            return log('warn', arguments);
         },
         error: function() {
-            log('error', arguments);
+            return log('error', arguments);
         },
         fatal: function() {
-            log('fatal', arguments);
+            return log('fatal', arguments);
         },
         debug: function() {
-            log('debug', arguments);
+            return log('debug', arguments);
         },
         trace: function() {
-            log('trace', arguments);
+            return log('trace', arguments);
         }
     };
 
-    obj.logger = logger;
-
+    if(direct) {
+        obj.info = logger.info;
+        obj.warn = logger.warn;
+        obj.error = logger.error;
+        obj.fatal = logger.fatal;
+        obj.debug = logger.debug;
+        obj.trace = logger.trace;
+    } else {
+        obj.logger = logger;
+    }
     return obj;
 };

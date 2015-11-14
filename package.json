@@ -10,9 +10,12 @@
   "license": "ISC",
   "dependencies": {
     "bunyan": "^1.5.1",
-    "lodash": "^3.10.1"
+    "lodash": "^3.10.1",
+    "sinon": "1.17.2"
   },
   "devDependencies": {
-    "eslint": "^1.9.0"
+    "eslint": "^1.9.0",
+    "chai": "3.4.1",
+    "mocha": "2.3.3"
   }
 }
