@@ -49,17 +49,17 @@ module.exports = function(setup) {
     }
 
     function defaultRouter(request, response) {
-        var parsedUrl = url.parse('http://' + request.url);
-
-        var urlFunction = url.pathname;
+        var fullUrl = 'http://' + request.headers.host + request.url;
+        var parsedUrl = url.parse(fullUrl);
+        var urlFunction = parsedUrl.pathname.slice(1);
         var method = request.method.toLowerCase();
         var handlerName = method + urlFunction.charAt(0).toUpperCase() + urlFunction.slice(1);
 
         obj.logger.info({
-            'route': url,
+            'route': fullUrl,
             'handler': handlerName,
             'method': method.toUpperCase(),
-            'ip': request.headers['X-Forwarded-For']
+            'ip': request.connection.remoteAddress
         });
 
         if (typeof setup.routes[handlerName] === 'function') {
@@ -105,6 +105,7 @@ module.exports = function(setup) {
         });
     }
 
+    obj.modifyHeaders = modifyHeaders;
     obj.start = start;
     obj.stop = stop;
     obj.writeResponse = writeResponse;
