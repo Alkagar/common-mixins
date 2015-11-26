@@ -60,12 +60,17 @@ function createClient(type, setup) {
     var userOnError = setup.onError || _.noop;
     var userOnReady = setup.onReady || _.noop;
 
-    clients[clientName] = {};
+    var types = type.split('|');
+    _.each(types, function(type) {
+        if(!clients[clientName]) {
+            clients[clientName] = {};
+        }
 
-    options = parseOptions(options);
-    clients[clientName][type] = redis.createClient(port, host, options);
-    clients[clientName][type].on('error', onError(userOnError));
-    clients[clientName][type].on('ready', onReady(userOnReady));
+        options = parseOptions(options);
+        clients[clientName][type] = redis.createClient(port, host, options);
+        clients[clientName][type].on('error', onError(userOnError));
+        clients[clientName][type].on('ready', onReady(userOnReady));
+    });
 }
 
 module.exports = function(obj, setup) {
