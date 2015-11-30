@@ -4,7 +4,7 @@ var path = require('path');
 var url = require('url');
 var http = require('http');
 var _ = require('lodash');
-var logger = require(path.join(__dirname, '../mixins/logger.js'));
+var logger = require(path.join(__dirname, '../mixins/simple-logger.js'));
 
 module.exports = function(setup) {
     var obj = {};

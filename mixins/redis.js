@@ -2,7 +2,7 @@
 
 var _ = require('lodash');
 var redis = require('redis');
-var logger = require('./logger.js');
+var logger = require('./simple-logger.js');
 
 var log = logger({}, {
     name: 'Redis Connection',
