@@ -72,6 +72,9 @@ module.exports = function(setup) {
 
     function _createServer(callback) {
         if (server !== null) {
+            obj.logger.warn({
+                message: 'Skipping, server already created.'
+            });
             return;
         }
         server = http.createServer(defaultRouter);
@@ -95,14 +98,22 @@ module.exports = function(setup) {
         _createServer(callback);
     }
 
-    function stop() {
+    function stop(callback) {
+        if(typeof callback !== 'function') {
+            callback = _.noop;
+        }
         if (server === null) {
+            obj.logger.warn({
+                message: 'Skipping, server already closed.'
+            });
+            callback();
             return;
         }
         server.close(function(err) {
             obj.logger.info({message: 'Server closed.'});
             server = null;
         });
+        callback();
     }
 
     obj.modifyHeaders = modifyHeaders;

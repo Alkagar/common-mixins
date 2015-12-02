@@ -3,7 +3,7 @@ var chai = require('chai');
 var expect = chai.expect;
 var _ = require('lodash');
 
-var logger = require(path.join(__dirname, '../mixins/logger.js'));
+var logger = require(path.join(__dirname, '../mixins/simple-logger.js'));
 
 
 describe('Logger ...', function() {
