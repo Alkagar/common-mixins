@@ -4,11 +4,7 @@ var _ = require('lodash');
 var redis = require('redis');
 var logger = require('./simple-logger.js');
 
-var log = logger({}, {
-    name: 'Redis Connection',
-    direct: true
-});
-
+var log = null;
 var clients = {
     publisher: null,
     subscriber: null
@@ -74,8 +70,20 @@ function createClient(type, setup) {
 }
 
 module.exports = function(obj, setup) {
-
     setup = setup || {};
+
+    if(log === null) {
+        var loggerDefault = {
+            name: 'Redis Connection',
+            direct: true
+        };
+        var loggerSetup = setup.logger || {};
+        loggerSetup = _.assign(loggerDefault, loggerSetup);
+        log = logger({}, loggerSetup);
+    } else {
+        // don't allow for reconfiguration of logger
+    }
+
     // type: publisher or subscriber
     var type = setup.type || 'publisher';
     var clientName = createClientName(setup);
@@ -85,6 +93,11 @@ module.exports = function(obj, setup) {
     obj.redisClient = function(type) {
         var type = type || 'publisher';
         return clients[clientName][type];
+    };
+    obj.clearClient = function(type) {
+        var type = type || 'publisher';
+        clients[clientName][type].end();
+        delete clients[clientName][type];
     };
 
     return obj;
