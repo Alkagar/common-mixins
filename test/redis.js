@@ -109,4 +109,20 @@ describe('Redis ...', function() {
         expect(objA.redisClient('publisher')).not.to.be.an('object');
         expect(objA.redisClient('subscriber')).not.to.be.an('object');
     });
+
+    it('should allow to include mysql persistence', function (done) {
+      var objA = redis({}, {
+          logger: {
+              level: 'error'
+          },
+          type: 'publisher',
+          persistence: {
+            "host": "localhost",
+            "user": "root",
+            "password": "",
+            "database": "gp"
+          },
+          onReady: done,
+      });
+    });
 });
