@@ -8,8 +8,8 @@ var moment = require('moment');
 var logger = simpleLogger({}).logger;
 
 // 'CREATE DATABASE IF NOT EXISTS gp;'
-// 'CREATE TABLE IF NOT EXISTS redis_commands (command varchar(40) NOT NULL, args varchar(300), created_at timestamp NOT NULL, _order INT NOT NULL, client_uuid VARCHAR(36) NOT NULL);'  // MySQL 5.5 doesnt support fractional timestamps
-// 'CREATE TABLE IF NOT EXISTS redis_commands (command varchar(40) NOT NULL, args varchar(300), created_at timestamp(3) NOT NULL, _order INT NOT NULL, client_uuid VARCHAR(36) NOT NULL);'  // MySQL 5.7 does support fractional timestamps
+// 'CREATE TABLE IF NOT EXISTS redis_commands (command varchar(40) NOT NULL, args text, created_at timestamp NOT NULL, _order INT NOT NULL, client_uuid VARCHAR(36) NOT NULL);'  // MySQL 5.5 doesnt support fractional timestamps
+// 'CREATE TABLE IF NOT EXISTS redis_commands (command varchar(40) NOT NULL, args text, created_at timestamp(3) NOT NULL, _order INT NOT NULL, client_uuid VARCHAR(36) NOT NULL);'  // MySQL 5.7 does support fractional timestamps
 var createPersistenceClient = function (persistenceConfig) {
   var pool = mysql.createPool(persistenceConfig);
   logger.debug('MySQL connection pool created');
@@ -181,7 +181,7 @@ var addPersistence = function (redisClient, persistenceConfig) {
 
   var newSendCommand = function(command, args, callback) {
     // handle convenience overloads, sometimes callback arrives inside args
-    if(!callback && typeof args[args.length - 1] == "function") {
+    if(!callback && args.length > 0 && typeof args[args.length - 1] == "function") {
       callback = args[args.length - 1];
       args = args.slice(0, args.length - 1);
     }
@@ -192,6 +192,9 @@ var addPersistence = function (redisClient, persistenceConfig) {
     var order = counter++;
     // var format = "YYYY-MM-DD HH:mm:ss.SSS";  // MySQL 5.7
     var format = "YYYY-MM-DD HH:mm:ss";  // MySQL 5.7
+    var order = counter++;  // increments counter even if command doesn't get stored, which is unnecessary
+    // var format = "YYYY-MM-DD HH:mm:ss.SSS";  // MySQL 5.7
+    var format = "YYYY-MM-DD HH:mm:ss";  // MySQL 5.5
     var timestamp = moment.utc().format(format);  // bit optistic, too early
     wrappedSendCommand.call(redisClient, command, args, function (error, result) {
       // var timestamp = moment.utc().format("YYYY-MM-DD HH:mm:ss");  // but here it's already too late, possibly shuffled
