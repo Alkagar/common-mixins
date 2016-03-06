@@ -10,8 +10,12 @@
   "license": "ISC",
   "dependencies": {
     "bunyan": "^1.5.1",
-    "lodash": "^3.10.1",
+    "lodash": "4.5.1",
+    "moment": "2.11.2",
+    "mysql": "2.10.2",
+    "node-uuid": "1.4.7",
     "redis": "2.3.0",
+    "request": "2.69.0",
     "sinon": "1.17.2"
   },
   "devDependencies": {

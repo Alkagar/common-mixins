@@ -4,6 +4,8 @@ var _ = require('lodash');
 var redis = require('redis');
 var logger = require('./simple-logger.js');
 
+var addPersistence = require('./redisPersistence').addPersistence;
+
 var log = null;
 var clients = {
     publisher: null,
@@ -52,6 +54,7 @@ function createClient(type, setup) {
     var host = setup.host || 'localhost';
     var port = setup.port || '6379';
     var options = setup.options || {};
+    var persistence = setup.persistence;
 
     var userOnError = setup.onError || _.noop;
     var userOnReady = setup.onReady || _.noop;
@@ -62,10 +65,16 @@ function createClient(type, setup) {
             clients[clientName] = {};
         }
 
-        options = parseOptions(options);
         clients[clientName][type] = redis.createClient(port, host, options);
         clients[clientName][type].on('error', onError(userOnError));
-        clients[clientName][type].on('ready', onReady(userOnReady));
+        if (persistence) {
+          clients[clientName][type].on('ready', function () {
+            clients[clientName][type] = addPersistence(clients[clientName][type], persistence)
+            onReady(userOnReady)()
+          });
+        } else {
+          clients[clientName][type].on('ready', onReady(userOnReady));
+        }
     });
 }
 
