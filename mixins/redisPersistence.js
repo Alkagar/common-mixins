@@ -180,6 +180,12 @@ var addPersistence = function (redisClient, persistenceConfig) {
   var wrappedSendCommand = redisClient.send_command;
 
   var newSendCommand = function(command, args, callback) {
+    // handle convenience overloads, sometimes callback arrives inside args
+    if(!callback && typeof args[args.length - 1] == "function") {
+      callback = args[args.length - 1];
+      args = args.slice(0, args.length - 1);
+    }
+
     // redis client allows both uppercase and lowercase commands
     command = _.lowerCase(command);  // TODO figure out a better place for this
 

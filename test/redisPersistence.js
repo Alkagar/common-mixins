@@ -21,6 +21,9 @@ mysqlClient.connect();
 
 describe("Redis persistence", function() {
   beforeEach(function() {
+    // TODO this currently fails, not only redisMixin caches the client and ends
+    // up storing flushdb, it also runs at a weird time and get's stored AFTER
+    // tests already execute their queries
     redisMixin({}, {}).redisClient().flushdb();
     mysqlClient.query('USE gp;');
     mysqlClient.query('DELETE FROM redis_commands;');
@@ -59,7 +62,6 @@ describe("Redis persistence", function() {
   });
 
   it('restores state from command list', function (done) {
-    done();
     // fixtures
     var query = 'INSERT INTO redis_commands (command, args, client_uuid, created_at, _order) VALUES ' +
       "('multi', '[]', 'de305d54-75b4-431b-adb2-eb6b9e546014', '2000-01-01 00:00:00.000', 0), " +
@@ -95,5 +97,17 @@ describe("Redis persistence", function() {
           }
         })
       });
+  });
+
+  it("handles normal callback", function (done) {
+    redisClient.set(["a", "b"], function() {
+      done();
+    });
+  });
+
+  it("handles list", function (done) {
+    redisClient.set("a", "b", function() {
+      done();
+    });
   });
 });
